@@ -32,6 +32,7 @@ def batch_from_image(img):
 	return images
 
 @predict_blueprint.post('/predict')
+@jwt_required()
 def predict():
 	file = request.files.get('file')
 	if file is None or file.filename == "":
