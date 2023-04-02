@@ -4,14 +4,17 @@ from os import environ
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 db = SQLAlchemy()
 jwt = JWTManager()
 
 def init_app():
 	app = Flask(__name__)
+	CORS(app)
 
 	load_dotenv()
+	app.config['CORS_HEADERS'] = 'Content-Type'
 	app.config['DEBUG'] = eval(environ["DEBUG_MODE"]) # Debug mode for flask app
 	app.config['SQLALCHEMY_DATABASE_URI'] = environ["PSQL_URL"] # connection string for postgres sql database
 	app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # set it to False to disable tracking and use less memory
