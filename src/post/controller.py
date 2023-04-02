@@ -22,22 +22,22 @@ def createPost():
     unixTime = request.json.get("unixTime")
     longitude = request.json.get("longitude")
     latitude = request.json.get("latitude")
-    categoryName = request.json.get("categoryName")
+    categoryId = request.json.get("categoryId")
 
-    if ((imgLink==None) or (None==unixTime) or (None==longitude) or (None==latitude) or (None==categoryName)):
+    if ((imgLink==None) or (None==unixTime) or (None==longitude) or (None==latitude) or (None==categoryId)):
         return jsonify({'success': False, 'message': 'please provide all arguments'})
     
     try:
-        category = Category.query.filter_by(categoryName=categoryName).one_or_none()
+        category = Category.query.filter_by(id=categoryId).one_or_none()
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
     
     if (not category):
-        return jsonify({'success': False, 'message': 'no category found with categoryName=[{}]'.format(categoryName)})
+        return jsonify({'success': False, 'message': 'no category found with categoryId=[{}]'.format(categoryId)})
     
     identity = get_jwt_identity()
 
-    new_post = Post(description=description,imgLink=imgLink,unixTime=unixTime,longitude=longitude,latitude=latitude,userId=identity,categoryId=category.id)
+    new_post = Post(description=description,imgLink=imgLink,unixTime=unixTime,longitude=longitude,latitude=latitude,userId=identity,categoryId=categoryId)
     try:
         db.session.add(new_post)
         db.session.commit()
