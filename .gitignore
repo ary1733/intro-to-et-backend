@@ -9,6 +9,4 @@ README.md
 __pycache__
 .pytest_cache
 /sample-images
-/Dockerfile
-/.gcloudignore
-/.dockerignore
+credentials.json
