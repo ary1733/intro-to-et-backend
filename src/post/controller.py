@@ -1,5 +1,6 @@
 from flask import jsonify, request
 from src import db
+from sqlalchemy import text
 from src.post import post_blueprint
 from src.post.model import Post
 from src.category.model import Category
@@ -69,11 +70,20 @@ def createPost():
 @jwt_required()
 def allPosts():
 	try:
-		lst = Post.query.all()
+		lst=[]
+		with db.engine.connect() as conn:
+			query = '''
+			select description,imgLink,unixTime,longitude,latitude,categoryName,email
+            from posts p inner join users u
+            on p.userId = u.id
+            inner join categories c on p.categoryId = c.id
+			'''
+			lst = conn.execute(text(query))
+			lst = lst.mappings().all()
+			lst = [dict(row) for row in lst]
 	except Exception as e:
 		return jsonify({'success': False, 'message': str(e)})
-
-	return jsonify({'success': True, 'list': [obj.as_dict() for obj in lst]})
+	return jsonify({'success': True,'list':lst})
 
 @post_blueprint.get('/getPost/<int:post_id>')
 @jwt_required()
