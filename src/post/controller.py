@@ -73,10 +73,11 @@ def allPosts():
 		lst=[]
 		with db.engine.connect() as conn:
 			query = '''
-			select description,imgLink,unixTime,longitude,latitude,categoryName,email
+			select description,imgLink,unixTime,longitude,latitude,categoryName,email, p.id as id
             from posts p inner join users u
             on p.userId = u.id
             inner join categories c on p.categoryId = c.id
+	    	order by unixTime desc
 			'''
 			lst = conn.execute(text(query))
 			lst = lst.mappings().all()
