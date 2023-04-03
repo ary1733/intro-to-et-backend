@@ -84,7 +84,12 @@ def refresh():
 @jwt_required()
 def whoami():
     identity = get_jwt_identity()
-    if (identity):
-        return jsonify({"success": True, "user_id": identity})
-    else:
+    if(not identity):
         return jsonify({"success": False})
+    try:
+        user = User.query.filter_by(id=identity).one_or_none()
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    if (not user):
+        return jsonify({'success': False, 'message': 'user with id=[{}] not present.'.format(identity)})
+    return jsonify({"success": True, "user": user.as_dict()})
