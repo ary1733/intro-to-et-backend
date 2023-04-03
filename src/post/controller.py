@@ -8,7 +8,7 @@ from flask_jwt_extended import (
 	jwt_required,
 	get_jwt_identity,
 )
-
+import uuid
 
 @post_blueprint.post('/uploadPostImage')
 @jwt_required()
@@ -20,7 +20,7 @@ def uploadPostImage():
 		
 		storage_client = storage.Client.from_service_account_json('credentials.json')
 		bucket = storage_client.get_bucket('post-images-btp-backend')
-		blob = bucket.blob(file.filename)
+		blob = bucket.blob(str(uuid.uuid4()))
 		blob.upload_from_file(file,content_type=file.content_type)
 		return jsonify({'success': True,"public_url": blob.public_url})
 	
