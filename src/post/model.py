@@ -10,6 +10,9 @@ class Post(db.Model):
     latitude = db.Column(db.Float, nullable=False)
     userId = db.Column(db.Integer,db.ForeignKey("users.id"), nullable=False)
     categoryId = db.Column(db.Integer,db.ForeignKey("categories.id"), nullable=False)
+    __table_args__ = (
+        db.Index('posts_unixTime_idx', unixTime.desc()),
+    )
     
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

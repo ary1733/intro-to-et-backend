@@ -3,6 +3,7 @@ from src import db
 from sqlalchemy import text
 from src.post import post_blueprint
 from src.post.model import Post
+from src.user.model import User
 from src.category.model import Category
 from google.cloud import storage
 from flask_jwt_extended import (
@@ -71,14 +72,27 @@ def createPost():
 def allPosts():
 	try:
 		lst=[]
-		with db.engine.connect() as conn:
-			query = '''
+		userId = get_jwt_identity()
+		user = User.query.filter_by(id=userId).one_or_none()
+		if(not user):
+			return jsonify({'success': False, 'message': 'user with id=[{}] not present.'.format(userId)})
+		query = '''
+		select description,imgLink,unixTime,longitude,latitude,categoryName,email, p.id as id
+		from posts p inner join users u
+		on p.userId = u.id
+		inner join categories c on p.categoryId = c.id
+		order by unixTime desc
+		'''
+		if(user.role=="USER"):
+			query = f'''
 			select description,imgLink,unixTime,longitude,latitude,categoryName,email, p.id as id
-            from posts p inner join users u
-            on p.userId = u.id
-            inner join categories c on p.categoryId = c.id
-	    	order by unixTime desc
+			from posts p inner join users u
+			on p.userId = u.id
+			inner join categories c on p.categoryId = c.id
+			where u.id = {userId}
+			order by unixTime desc
 			'''
+		with db.engine.connect() as conn:
 			lst = conn.execute(text(query))
 			lst = lst.mappings().all()
 			lst = [dict(row) for row in lst]
@@ -91,10 +105,18 @@ def allPosts():
 def getPost(post_id):
 	try:
 		post = Post.query.filter_by(id=post_id).one_or_none()
+		if (not post):
+			return jsonify({'success': False, 'message': 'post with id=[{}] not present.'.format(post_id)})
+		
+		userId = get_jwt_identity()
+		user = User.query.filter_by(id=userId).one_or_none()
+		if(not user):
+			return jsonify({'success': False, 'message': 'user with id=[{}] not present.'.format(userId)})
+		if(user.role=="USER" and userId!=post.userId):
+			return jsonify({'success': False, 'message': 'user with id=[{}] is not the author for post with id=[{}].'.format(userId,post_id)})
+		
 	except Exception as e:
 		return jsonify({'success': False, 'message': str(e)})
-	if (not post):
-		return jsonify({'success': False, 'message': 'post with id=[{}] not present.'.format(post_id)})
 	return jsonify({'success': True, 'post': post.as_dict()})
 
 @post_blueprint.delete('/deletePost/<int:post_id>')
@@ -104,6 +126,14 @@ def deletePost(post_id):
 		post = Post.query.filter_by(id=post_id).one_or_none()
 		if (not post):
 			return jsonify({'success': False, 'message': 'post with id=[{}] not present.'.format(post_id)})
+		
+		userId = get_jwt_identity()
+		user = User.query.filter_by(id=userId).one_or_none()
+		if(not user):
+			return jsonify({'success': False, 'message': 'user with id=[{}] not present.'.format(userId)})
+		if(user.role=="USER" and userId!=post.userId):
+			return jsonify({'success': False, 'message': 'user with id=[{}] is not the author for post with id=[{}].'.format(userId,post_id)})
+
 		db.session.delete(post)
 		db.session.commit()
 	except Exception as e:
