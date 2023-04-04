@@ -55,6 +55,8 @@ def deleteCategory(categoryId):
 		category = Category.query.filter_by(id=categoryId).one_or_none()
 		if (not category):
 			return jsonify({'success': False, 'message': 'category with id=[{}] not present.'.format(categoryId)})
+		if(category.isTrained):
+			return jsonify({'success': False, 'message': 'category with id=[{}] cannot be deleted as it is ml trained'.format(categoryId)})
 		db.session.delete(category)
 		db.session.commit()
 	except Exception as e:
