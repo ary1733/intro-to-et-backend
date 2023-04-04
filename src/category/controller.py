@@ -47,3 +47,16 @@ def getCategory(categoryId):
     if (not category):
         return jsonify({'success': False, 'message': 'category with categoryId=[{}] not present.'.format(categoryId)})
     return jsonify({'success': True, 'category': category.as_dict()})
+
+@category_blueprint.delete('/deleteCategory/<int:categoryId>')
+@jwt_required()
+def deleteCategory(categoryId):
+	try:
+		category = Category.query.filter_by(id=categoryId).one_or_none()
+		if (not category):
+			return jsonify({'success': False, 'message': 'category with id=[{}] not present.'.format(categoryId)})
+		db.session.delete(category)
+		db.session.commit()
+	except Exception as e:
+		return jsonify({'success': False, 'message': str(e)})
+	return jsonify({'success': True, 'message': 'category with id=[{}] deleted successfully.'.format(categoryId)})

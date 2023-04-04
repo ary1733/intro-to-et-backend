@@ -96,3 +96,16 @@ def getPost(post_id):
 	if (not post):
 		return jsonify({'success': False, 'message': 'post with id=[{}] not present.'.format(post_id)})
 	return jsonify({'success': True, 'post': post.as_dict()})
+
+@post_blueprint.delete('/deletePost/<int:post_id>')
+@jwt_required()
+def deletePost(post_id):
+	try:
+		post = Post.query.filter_by(id=post_id).one_or_none()
+		if (not post):
+			return jsonify({'success': False, 'message': 'post with id=[{}] not present.'.format(post_id)})
+		db.session.delete(post)
+		db.session.commit()
+	except Exception as e:
+		return jsonify({'success': False, 'message': str(e)})
+	return jsonify({'success': True, 'message': 'post with id=[{}] deleted successfully.'.format(post_id)})
