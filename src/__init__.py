@@ -15,7 +15,7 @@ def init_app():
 	
 	load_dotenv()
 	app.config['DEBUG'] = eval(environ["DEBUG_MODE"]) # Debug mode for flask app
-	app.config['SQLALCHEMY_DATABASE_URI'] = environ["PSQL_URL"] # connection string for postgres sql database
+	app.config['SQLALCHEMY_DATABASE_URI'] = environ["SQL_URL"] # connection string for postgres sql database
 	app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # set it to False to disable tracking and use less memory
 	app.config['JWT_SECRET_KEY'] = environ["JWT_SECRET"] # secret key for JWT
 	app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
