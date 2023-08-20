@@ -19,8 +19,9 @@ def signup():
     email = request.json.get("email")
     password = request.json.get("password")
     role = request.json.get("role")
-    if (not email or not password):
-        raise Exception('please provide email and password')
+    name = request.json.get("name")
+    if (not email or not password or not name):
+        raise Exception('please provide email, password and name')
     if(role!='USER' and role!='ADMIN'):
         raise Exception('role can either be USER or ADMIN')
     
@@ -32,7 +33,7 @@ def signup():
     if (user):
         raise Exception('user with email=[{}] already present'.format(email))
     password = generate_password_hash(password)
-    new_user = User(email=email, password=password,role=role)
+    new_user = User(email=email, password=password,role=role,name=name)
     try:
         db.session.add(new_user)
         db.session.commit()
@@ -59,7 +60,6 @@ def login():
         raise Exception('Incorrect password')
 
     return jsonify({
-        "success": True,
         "user": {
             "refresh_token": create_refresh_token(identity=user.id),
             "access_token": create_access_token(identity=user.id)
@@ -73,7 +73,6 @@ def login():
 def refresh():
     identity = get_jwt_identity()
     return jsonify({
-        "success": True,
         "user": {
             "access_token": create_access_token(identity=identity)
         }
@@ -92,4 +91,4 @@ def whoami():
         raise e
     if (not user):
         raise Exception('user with id=[{}] not present.'.format(identity))
-    return jsonify({"success": True, "user": user.as_dict()})
+    return jsonify({"user": user.as_dict()})

@@ -5,6 +5,7 @@ from os import environ
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+# from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_cors import CORS
 
 db = SQLAlchemy()
@@ -19,15 +20,15 @@ def init_app():
 	app.config['SQLALCHEMY_DATABASE_URI'] = environ["SQL_URL"] # connection string for postgres sql database
 	app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # set it to False to disable tracking and use less memory
 	app.config['JWT_SECRET_KEY'] = environ["JWT_SECRET"] # secret key for JWT
-	app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 	# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(seconds=10)
+	app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 	app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 	app.config["JWT_ERROR_MESSAGE_KEY"] = 'message'
 	app.config['TRAP_HTTP_EXCEPTIONS']=True
 
 	@app.errorhandler(Exception)
 	def handle_error(e):
-			return jsonify({'message': str(e)}), status.HTTP_500_INTERNAL_SERVER_ERROR
+		return jsonify({'message': str(e)}), status.HTTP_500_INTERNAL_SERVER_ERROR
 
 	print('\tFlask App configurations loaded...')
 
