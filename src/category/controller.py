@@ -15,7 +15,7 @@ def createcategory():
     categoryName = request.json.get("categoryName")
 
     if (categoryName==None):
-        return jsonify({'success': False, 'message': 'please provide all arguments'})
+        raise Exception('please provide all arguments')
     
 
     new_category = Category(categoryName=categoryName,isTrained=False)
@@ -23,9 +23,8 @@ def createcategory():
         db.session.add(new_category)
         db.session.commit()
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
-
-    return jsonify({'success': True, 'message': 'category created successfully'})
+        raise e
+    return jsonify({'message': 'category created successfully'})
 
 @category_blueprint.get('/allCategories')
 @jwt_required()
@@ -33,9 +32,9 @@ def allCategories():
     try:
         lst = Category.query.all()
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        raise e
 
-    return jsonify({'success': True, 'list': [obj.as_dict() for obj in lst]})
+    return jsonify({'list': [obj.as_dict() for obj in lst]})
 
 @category_blueprint.get('/getCategory/<int:categoryId>')
 @jwt_required()
@@ -43,10 +42,10 @@ def getCategory(categoryId):
     try:
         category = Category.query.filter_by(id=categoryId).one_or_none()
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        raise e
     if (not category):
-        return jsonify({'success': False, 'message': 'category with categoryId=[{}] not present.'.format(categoryId)})
-    return jsonify({'success': True, 'category': category.as_dict()})
+        raise Exception('category with categoryId=[{}] not present.'.format(categoryId))
+    return jsonify({'category': category.as_dict()})
 
 @category_blueprint.delete('/deleteCategory/<int:categoryId>')
 @jwt_required()
@@ -54,11 +53,11 @@ def deleteCategory(categoryId):
 	try:
 		category = Category.query.filter_by(id=categoryId).one_or_none()
 		if (not category):
-			return jsonify({'success': False, 'message': 'category with id=[{}] not present.'.format(categoryId)})
+			raise Exception('category with id=[{}] not present.'.format(categoryId))
 		if(category.isTrained):
-			return jsonify({'success': False, 'message': 'category with id=[{}] cannot be deleted as it is ml trained'.format(categoryId)})
+			raise Exception('category with id=[{}] cannot be deleted as it is ml trained'.format(categoryId))
 		db.session.delete(category)
 		db.session.commit()
 	except Exception as e:
-		return jsonify({'success': False, 'message': str(e)})
-	return jsonify({'success': True, 'message': 'category with id=[{}] deleted successfully.'.format(categoryId)})
+		raise e
+	return jsonify({'message': 'category with id=[{}] deleted successfully.'.format(categoryId)})

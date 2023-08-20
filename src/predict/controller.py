@@ -36,7 +36,7 @@ def batch_from_image(img):
 def predict():
 	file = request.files.get('file')
 	if file is None or file.filename == "":
-		return jsonify({'success': False,"message": "no file"})
+		raise Exception('no file provided')
 	try:
 		image_bytes = file.read()
 		
@@ -52,6 +52,6 @@ def predict():
 		lst = []
 		for i in range(len(predicted)):
 			lst.append(labels_map[str(int(predicted[i]))])
-		return jsonify({'success': True,"prediction" : lst})
+		return jsonify({"prediction" : lst})
 	except Exception as e:
-		return jsonify({'success': False,"message": str(e)})
+		raise e

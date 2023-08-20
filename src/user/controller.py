@@ -10,11 +10,9 @@ from flask_jwt_extended import (
     get_jwt_identity,
 )
 
-
 @user_blueprint.get('/ping')
 def ping():
     return jsonify('OK')
-
 
 @user_blueprint.post('/signup')
 def signup():
@@ -22,44 +20,43 @@ def signup():
     password = request.json.get("password")
     role = request.json.get("role")
     if (not email or not password):
-        return jsonify({'success': False, 'message': 'please provide email and password'})
+        raise Exception('please provide email and password')
     if(role!='USER' and role!='ADMIN'):
-        return jsonify({'success': False, 'message': 'role can either be USER or ADMIN'})
+        raise Exception('role can either be USER or ADMIN')
     
     try:
         user = User.query.filter_by(email=email).one_or_none()
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        raise e
 
     if (user):
-        return jsonify({'success': False, 'message': 'user with email=[{}] already present'.format(email)})
+        raise Exception('user with email=[{}] already present'.format(email))
     password = generate_password_hash(password)
     new_user = User(email=email, password=password,role=role)
     try:
         db.session.add(new_user)
         db.session.commit()
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        raise e
 
     return jsonify({'success': True, 'message': 'User created successfully'})
-
 
 @user_blueprint.post("/login")
 def login():
     email = request.json.get("email")
     password = request.json.get("password")
     if (not email or not password):
-        return jsonify({'success': False, 'message': 'please provide email and password'})
+        raise Exception('please provide email and password')
 
     try:
         user = User.query.filter_by(email=email).one_or_none()
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        raise e
     if (not user):
-        return jsonify({'success': False, 'message': 'user with email=[{}] not present. Do Signup first.'.format(email)})
+        raise Exception('user with email=[{}] not present. Do Signup first.'.format(email))
 
     if not check_password_hash(user.password, password):
-        return jsonify({'success': False, 'message': 'Incorrect password'})
+        raise Exception('Incorrect password')
 
     return jsonify({
         "success": True,
@@ -92,7 +89,7 @@ def whoami():
     try:
         user = User.query.filter_by(id=identity).one_or_none()
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        raise e
     if (not user):
-        return jsonify({'success': False, 'message': 'user with id=[{}] not present.'.format(identity)})
+        raise Exception('user with id=[{}] not present.'.format(identity))
     return jsonify({"success": True, "user": user.as_dict()})

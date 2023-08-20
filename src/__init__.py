@@ -1,5 +1,6 @@
 from datetime import timedelta
-from flask import Flask
+from flask import Flask, jsonify
+from flask_api import status
 from os import environ
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
@@ -21,6 +22,12 @@ def init_app():
 	app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 	# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(seconds=10)
 	app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+	app.config["JWT_ERROR_MESSAGE_KEY"] = 'message'
+	app.config['TRAP_HTTP_EXCEPTIONS']=True
+
+	@app.errorhandler(Exception)
+	def handle_error(e):
+			return jsonify({'message': str(e)}), status.HTTP_500_INTERNAL_SERVER_ERROR
 
 	print('\tFlask App configurations loaded...')
 
