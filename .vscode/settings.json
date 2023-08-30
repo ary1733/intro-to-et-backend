@@ -2,5 +2,6 @@
 	"files.exclude": {
         "**/__pycache__/": true,
         // ".vscode/": true,
-    }
+    },
+    "cph.general.saveLocation": ""
 }

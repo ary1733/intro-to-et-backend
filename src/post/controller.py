@@ -5,7 +5,7 @@ from src.post import post_blueprint
 from src.post.model import Post
 from src.user.model import User
 from src.category.model import Category
-from google.cloud import storage
+# from google.cloud import storage
 from flask_jwt_extended import (
 	jwt_required,
 	get_jwt_identity,
@@ -20,11 +20,12 @@ def uploadPostImage():
 		raise Exception('no file provided')
 	try:
 		
-		storage_client = storage.Client.from_service_account_json('credentials.json')
-		bucket = storage_client.get_bucket('post-images-btp-backend')
-		blob = bucket.blob(str(uuid.uuid4()))
-		blob.upload_from_file(file,content_type=file.content_type)
-		return jsonify({"public_url": blob.public_url})
+		# storage_client = storage.Client.from_service_account_json('credentials.json')
+		# bucket = storage_client.get_bucket('post-images-btp-backend')
+		# blob = bucket.blob(str(uuid.uuid4()))
+		# blob.upload_from_file(file,content_type=file.content_type)
+		# return jsonify({"public_url": blob.public_url})
+		return jsonify({"public_url": 'blob.public_url'})
 	
 	except Exception as e:
 		raise e

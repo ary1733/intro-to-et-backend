@@ -62,8 +62,7 @@ def init_app():
 	from src.user import user_blueprint
 	from src.post import post_blueprint
 	from src.category import category_blueprint
-	from src.predict import predict_blueprint
-	for blueprint in [user_blueprint,post_blueprint,category_blueprint,predict_blueprint]:
+	for blueprint in [user_blueprint,post_blueprint,category_blueprint]:
 		print('\troutes for '+str(blueprint)+' loaded...')
 		app.register_blueprint(blueprint)
 
@@ -74,10 +73,9 @@ def init_app():
 	print('\tDatabase tables created...')
 
 	with app.app_context():
-		from src.predict import labels_map
 		from src.category.model import Category
-		for key in labels_map:
-			categoryName = labels_map[key]
+		file = open('./src/predict/labels.txt', 'r')
+		for categoryName in file.readlines():
 			old_category = Category.query.filter_by(categoryName=categoryName).one_or_none()
 			if(old_category): # if the ml trained category already present, dont add again in table
 				continue
