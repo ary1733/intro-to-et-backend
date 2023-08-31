@@ -2,7 +2,6 @@
 .env
 # .vscode/
 **/__pycache__
-README.md
 *.pyc
 *.pyo
 *.pyd
