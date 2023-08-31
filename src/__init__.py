@@ -75,7 +75,8 @@ def init_app():
 	with app.app_context():
 		from src.category.model import Category
 		file = open('./src/predict/labels.txt', 'r')
-		for categoryName in file.readlines():
+		for line in file.readlines():
+			categoryName=line.strip()
 			old_category = Category.query.filter_by(categoryName=categoryName).one_or_none()
 			if(old_category): # if the ml trained category already present, dont add again in table
 				continue
