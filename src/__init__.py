@@ -10,6 +10,8 @@ from flask_cors import CORS
 import logging
 from logging.handlers import RotatingFileHandler
 from flask.logging import default_handler
+import os
+from pathlib import Path
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -28,9 +30,14 @@ def init_app():
 	app.logger.removeHandler(default_handler)
 	app.logger.addHandler(handler)
 	app.logger.setLevel(logging.INFO)
+
+	# WE ARE USING AFTER REQUEST HERE
+	# USE THIS INCASE OF DEBUGGING
+	# when response is image instead of json,
+	# this logging throws error
 	@app.after_request
 	def log_requests(response):
-		app.logger.info('[' + request.method + '] ' +'[' + request.full_path + '] ' + '[' + response.status + '] ' + '[' + response.data.decode('utf-8').strip() + ']')
+		# app.logger.info('[' + request.method + '] ' +'[' + request.full_path + '] ' + '[' + response.status + '] ' + '[' + response.data.decode('utf-8').strip() + ']')
 		return response
 	
 	# configure the environment variables
@@ -44,21 +51,17 @@ def init_app():
 	app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 	app.config["JWT_ERROR_MESSAGE_KEY"] = 'message'
 	app.config['TRAP_HTTP_EXCEPTIONS']=True
-	app.config['UPLOAD_FOLDER'] = 'file_data'
+	app.config['IMG_UPLOAD_FOLDER'] = 'file_data'
 	print('\tFlask App configurations loaded...')
 
-	# Error handler
-	# @app.errorhandler(Exception)
-	# def handle_error(e):
-	# 	return jsonify({'message': str(e)}), status.HTTP_500_INTERNAL_SERVER_ERROR
+	# create image upload directory if not exists
+	directory = os.path.join(Path.cwd(),app.config['IMG_UPLOAD_FOLDER'])
+	Path(directory).mkdir(parents=True, exist_ok=True)
 
-	@app.route('/download/<filename>')
-	def download_file(filename):
-		# Define the path to the file you want to send
-		file_path = f"/Users/aryan/Desktop/untitled/{filename}"
-		print("i am here in download __init__")
-		# Use send_file to send the file to the client
-		return send_file("/Users/aryan/Desktop/a.png", as_attachment=False)
+	# Error handler
+	@app.errorhandler(Exception)
+	def handle_error(e):
+		return jsonify({'message': str(e)}), status.HTTP_500_INTERNAL_SERVER_ERROR
 
 	db.init_app(app)
 	print('\tDatabase initialised...')
