@@ -1,5 +1,5 @@
 from datetime import timedelta
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_api import status
 from os import environ, makedirs as os_makedirs, path as os_path
 from dotenv import load_dotenv
@@ -44,12 +44,21 @@ def init_app():
 	app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 	app.config["JWT_ERROR_MESSAGE_KEY"] = 'message'
 	app.config['TRAP_HTTP_EXCEPTIONS']=True
+	app.config['UPLOAD_FOLDER'] = 'file_data'
 	print('\tFlask App configurations loaded...')
 
 	# Error handler
-	@app.errorhandler(Exception)
-	def handle_error(e):
-		return jsonify({'message': str(e)}), status.HTTP_500_INTERNAL_SERVER_ERROR
+	# @app.errorhandler(Exception)
+	# def handle_error(e):
+	# 	return jsonify({'message': str(e)}), status.HTTP_500_INTERNAL_SERVER_ERROR
+
+	@app.route('/download/<filename>')
+	def download_file(filename):
+		# Define the path to the file you want to send
+		file_path = f"/Users/aryan/Desktop/untitled/{filename}"
+		print("i am here in download __init__")
+		# Use send_file to send the file to the client
+		return send_file("/Users/aryan/Desktop/a.png", as_attachment=False)
 
 	db.init_app(app)
 	print('\tDatabase initialised...')

@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, send_file, send_from_directory, Response,current_app
 from src import db
 from sqlalchemy import text
 from src.post import post_blueprint
@@ -11,6 +11,29 @@ from flask_jwt_extended import (
 	get_jwt_identity,
 )
 import uuid
+from werkzeug.utils import secure_filename
+import os
+from pathlib import Path
+
+@post_blueprint.get('/getPostImage/<string:file_name>')
+@jwt_required()
+def getPostImage(file_name):
+	identity = get_jwt_identity()
+	if(not identity):
+		raise Exception('Invalid token')
+	directory = os.path.join(Path.cwd(),'file_data',str(identity))
+	existing_file_path = os.path.join(directory, file_name)
+	print(existing_file_path)
+	existing_file_path = '/Users/aryan/Desktop/btp-backend-flask/file_data/1/a.png'
+	existing_file_path = '/Users/aryan/Desktop/btp-backend-flask/a.png'
+	existing_file_path = '/Users/aryan/Desktop/btp-backend-flask/src/a.png'
+	print(current_app.config['UPLOAD_FOLDER'])
+	return send_file("/Users/aryan/Desktop/a.png", as_attachment=False)
+	try:
+		
+		return send_file("/Users/aryan/Desktop/untitled-app/a.png", as_attachment=False)
+	except Exception as e:
+		print(e)
 
 @post_blueprint.post('/uploadPostImage')
 @jwt_required()
@@ -18,17 +41,19 @@ def uploadPostImage():
 	file = request.files.get('file')
 	if file is None or file.filename == "":
 		raise Exception('no file provided')
-	try:
-		
-		# storage_client = storage.Client.from_service_account_json('credentials.json')
-		# bucket = storage_client.get_bucket('post-images-btp-backend')
-		# blob = bucket.blob(str(uuid.uuid4()))
-		# blob.upload_from_file(file,content_type=file.content_type)
-		# return jsonify({"public_url": blob.public_url})
-		return jsonify({"public_url": 'blob.public_url'})
-	
-	except Exception as e:
-		raise e
+	identity = get_jwt_identity()
+	if(not identity):
+		raise Exception('Invalid token')
+
+	directory = os.path.join(Path.cwd(),'file_data',str(identity))
+	Path(directory).mkdir(parents=True, exist_ok=True)
+	file_name = secure_filename(file.filename)
+	saved_file_path = os.path.join(directory,file_name )
+	print(saved_file_path)
+	file.save(saved_file_path)
+
+	return jsonify({"public_url": file_name})
+
 
 @post_blueprint.get('/ping')
 @jwt_required()

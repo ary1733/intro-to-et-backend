@@ -84,7 +84,7 @@ def refresh():
 def whoami():
     identity = get_jwt_identity()
     if(not identity):
-        return jsonify({"success": False})
+        raise Exception('Invalid token')
     try:
         user = User.query.filter_by(id=identity).one_or_none()
     except Exception as e:

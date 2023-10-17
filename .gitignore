@@ -10,3 +10,5 @@ __pycache__
 /sample-images
 credentials.json
 /logs
+/file_data
+*.DS_Store
