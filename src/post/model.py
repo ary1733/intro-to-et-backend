@@ -4,7 +4,7 @@ class Post(db.Model):
     __tablename__ = "posts"
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.Text, nullable=True)
-    imgLink = db.Column(db.String(255), nullable=False)
+    imgID = db.Column(db.String(255), nullable=False)
     unixTime = db.Column(db.Integer, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)

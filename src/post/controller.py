@@ -15,7 +15,7 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 
 @post_blueprint.get('/getPostImage/<string:file_name>')
-@jwt_required()
+# @jwt_required(), currently the image links are public
 def getPostImage(file_name):
 	directory = os.path.join(Path.cwd(),current_app.config['IMG_UPLOAD_FOLDER'])
 	existing_file_path = os.path.join(directory, file_name)
@@ -32,7 +32,7 @@ def uploadPostImage():
 	file_name = str(uuid.uuid4()) + "_" + secure_filename(file.filename)
 	saved_file_path = os.path.join(directory,file_name )
 	file.save(saved_file_path)
-	return jsonify({"unique_file_name": file_name})
+	return jsonify({"imgID": file_name})
 
 @post_blueprint.get('/ping')
 @jwt_required()
@@ -43,13 +43,13 @@ def ping():
 @jwt_required()
 def createPost():
 	description = request.json.get("description")
-	imgLink = request.json.get("imgLink")
+	imgID = request.json.get("imgID")
 	unixTime = request.json.get("unixTime")
 	longitude = request.json.get("longitude")
 	latitude = request.json.get("latitude")
 	categoryId = request.json.get("categoryId")
 
-	if ((imgLink==None) or (None==unixTime) or (None==longitude) or (None==latitude) or (None==categoryId)):
+	if ((imgID==None) or (None==unixTime) or (None==longitude) or (None==latitude) or (None==categoryId)):
 		raise Exception('please provide all arguments')
 	
 	try:
@@ -62,7 +62,7 @@ def createPost():
 	
 	identity = get_jwt_identity()
 
-	new_post = Post(description=description,imgLink=imgLink,unixTime=unixTime,longitude=longitude,latitude=latitude,userId=identity,categoryId=categoryId)
+	new_post = Post(description=description,imgID=imgID,unixTime=unixTime,longitude=longitude,latitude=latitude,userId=identity,categoryId=categoryId)
 	try:
 		db.session.add(new_post)
 		db.session.commit()
@@ -81,7 +81,7 @@ def allPosts():
 		if(not user):
 			raise Exception('user with id=[{}] not present.'.format(userId))
 		query = '''
-		select description,imgLink,unixTime,longitude,latitude,categoryName,email, p.id as id
+		select description,imgID,unixTime,longitude,latitude,categoryName,email, p.id as id
 		from posts p inner join users u
 		on p.userId = u.id
 		inner join categories c on p.categoryId = c.id
@@ -89,7 +89,7 @@ def allPosts():
 		'''
 		if(user.role=="USER"):
 			query = f'''
-			select description,imgLink,unixTime,longitude,latitude,categoryName,email, p.id as id
+			select description,imgID,unixTime,longitude,latitude,categoryName,email, p.id as id
 			from posts p inner join users u
 			on p.userId = u.id
 			inner join categories c on p.categoryId = c.id
