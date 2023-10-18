@@ -1,15 +1,11 @@
 from datetime import timedelta
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify
 from flask_api import status
-from os import environ, makedirs as os_makedirs, path as os_path
+from os import environ
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-# from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_cors import CORS
-import logging
-from logging.handlers import RotatingFileHandler
-from flask.logging import default_handler
 import os
 from pathlib import Path
 
@@ -20,27 +16,6 @@ def init_app():
 
 	app = Flask(__name__)
 	CORS(app,resources={r'*':{'origins':'*','supports_credentials':True}})
-
-	# WE ARE USING AFTER REQUEST HERE
-	# USE THIS INCASE OF DEBUGGING
-	# when response is image instead of json,
-	# this logging throws error
-
-	# Configure the logger
-	# log_file_path = './logs/flask_app.log'
-	# os_makedirs(os_path.dirname(log_file_path), exist_ok=True)
-	# handler = RotatingFileHandler(log_file_path, maxBytes=1000000, backupCount=5)
-	# formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-	# handler.setFormatter(formatter)
-	# app.logger.removeHandler(default_handler)
-	# app.logger.addHandler(handler)
-	# app.logger.setLevel(logging.INFO)
-
-	
-	# @app.after_request
-	# def log_requests(response):
-		# app.logger.info('[' + request.method + '] ' +'[' + request.full_path + '] ' + '[' + response.status + '] ' + '[' + response.data.decode('utf-8').strip() + ']')
-		# return response
 	
 	# configure the environment variables
 	load_dotenv()
