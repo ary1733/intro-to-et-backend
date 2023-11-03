@@ -13,6 +13,7 @@ import uuid
 import os
 from pathlib import Path
 from werkzeug.utils import secure_filename
+from geoalchemy2 import WKTElement
 
 @post_blueprint.get('/getPostImage/<string:file_name>')
 # @jwt_required(), currently the image links are public
@@ -48,6 +49,35 @@ def createPost():
 	longitude = request.json.get("longitude")
 	latitude = request.json.get("latitude")
 	categoryId = request.json.get("categoryId")
+	geometry =  WKTElement(f'POINT({longitude} {latitude})', srid=4326)
+
+	"""
+		This is the query for inserting and selecting a point in PostGIS
+
+		insert into posts (description, geometry)
+		values ( 'my loc', ST_SetSRID(ST_MakePoint( 87.306000,22.314030),4326) );
+
+		This inserts a point with
+		lat = 87.306000
+		long = 22.314030
+		srid = 4326
+		
+		select st_asewkt(geometry) as cooridnates,* from posts as p;
+
+		Please note that we are storing the points as (long,lat) in the geometry shape
+		in our database, this is because, there is some bug in leaflet which does not make
+		heatmaps correctly.
+
+		f'POINT({longitude} {latitude})'
+		-> will be changed to 
+		f'POINT({latitude} {longitude})'
+		after fixing the bug
+
+		Summarising,
+		column named "longitude" -> storing actual longitude
+		column named "latitude" -> storing actual latitude
+		column named "geometry" -> storing (longitude,latitude) instead of (latitude,longitude)
+	"""
 
 	if ((imgID==None) or (None==unixTime) or (None==longitude) or (None==latitude) or (None==categoryId)):
 		raise Exception('please provide all arguments')
@@ -61,8 +91,7 @@ def createPost():
 		raise Exception('no category found with categoryId=[{}]'.format(categoryId))
 	
 	identity = get_jwt_identity()
-
-	new_post = Post(description=description,imgID=imgID,unixTime=unixTime,longitude=longitude,latitude=latitude,userId=identity,categoryId=categoryId)
+	new_post = Post(description=description,imgID=imgID,unixTime=unixTime,longitude=longitude,latitude=latitude,userId=identity,categoryId=categoryId,geometry=geometry)
 	try:
 		db.session.add(new_post)
 		db.session.commit()
@@ -81,20 +110,20 @@ def allPosts():
 		if(not user):
 			raise Exception('user with id=[{}] not present.'.format(userId))
 		query = '''
-		select description,imgID,unixTime,longitude,latitude,categoryName,email, p.id as id
+		select description,"imgID","unixTime","longitude","latitude","categoryName",email, p.id as id
 		from posts p inner join users u
-		on p.userId = u.id
-		inner join categories c on p.categoryId = c.id
-		order by unixTime desc
+		on p."userId" = u.id
+		inner join categories c on p."categoryId" = c.id
+		order by "unixTime" desc
 		'''
 		if(user.role=="USER"):
 			query = f'''
-			select description,imgID,unixTime,longitude,latitude,categoryName,email, p.id as id
+			select description,"imgID","unixTime","longitude","latitude","categoryName",email, p.id as id
 			from posts p inner join users u
-			on p.userId = u.id
-			inner join categories c on p.categoryId = c.id
+			on p."userId" = u.id
+			inner join categories c on p."categoryId" = c.id
 			where u.id = {userId}
-			order by unixTime desc
+			order by "unixTime" desc
 			'''
 		with db.engine.connect() as conn:
 			lst = conn.execute(text(query))
