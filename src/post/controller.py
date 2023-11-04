@@ -110,7 +110,7 @@ def allPosts():
 		if(not user):
 			raise Exception('user with id=[{}] not present.'.format(userId))
 		query = '''
-		select description,"imgID","unixTime","longitude","latitude","categoryName",email, p.id as id
+		select description,"imgID","unixTime","longitude","latitude","categoryName",email,name, p.id as id
 		from posts p inner join users u
 		on p."userId" = u.id
 		inner join categories c on p."categoryId" = c.id
@@ -118,7 +118,7 @@ def allPosts():
 		'''
 		if(user.role=="USER"):
 			query = f'''
-			select description,"imgID","unixTime","longitude","latitude","categoryName",email, p.id as id
+			select description,"imgID","unixTime","longitude","latitude","categoryName",email,name, p.id as id
 			from posts p inner join users u
 			on p."userId" = u.id
 			inner join categories c on p."categoryId" = c.id

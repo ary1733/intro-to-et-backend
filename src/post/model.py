@@ -17,4 +17,8 @@ class Post(db.Model):
     )
     
     def as_dict(self):
-       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        dict = {}
+        for c in self.__table__.columns:
+            if(c.name!='geometry'):
+                dict[c.name] = getattr(self, c.name)
+        return dict
