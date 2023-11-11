@@ -28,12 +28,7 @@ def init_app():
 	app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 	app.config["JWT_ERROR_MESSAGE_KEY"] = 'message'
 	app.config['TRAP_HTTP_EXCEPTIONS']=True
-	app.config['IMG_UPLOAD_FOLDER'] = 'file_data'
 	print('\tFlask App configurations loaded...')
-
-	# create image upload directory if not exists
-	directory = os.path.join(Path.cwd(),app.config['IMG_UPLOAD_FOLDER'])
-	Path(directory).mkdir(parents=True, exist_ok=True)
 
 	# Error handler
 	@app.errorhandler(Exception)
@@ -50,8 +45,7 @@ def init_app():
 	# user,post etc.
 	from src.user import user_blueprint
 	from src.post import post_blueprint
-	from src.category import category_blueprint
-	for blueprint in [user_blueprint,post_blueprint,category_blueprint]:
+	for blueprint in [user_blueprint,post_blueprint]:
 		print('\troutes for '+str(blueprint)+' loaded...')
 		app.register_blueprint(blueprint)
 
@@ -60,20 +54,6 @@ def init_app():
 	with app.app_context():
 		db.create_all()
 	print('\tDatabase tables created...')
-
-	with app.app_context():
-		from src.category.model import Category
-		file = open('./src/predict/labels.txt', 'r')
-		for line in file.readlines():
-			categoryName=line.strip()
-			old_category = Category.query.filter_by(categoryName=categoryName).one_or_none()
-			if(old_category): # if the ml trained category already present, dont add again in table
-				continue
-			new_category = Category(categoryName=categoryName,isTrained=True)
-			db.session.add(new_category)
-			print('\tML trained category '+categoryName+' added in session...')
-		db.session.commit()
-		print('\tAll ML trained categories commited successfully...')
 
 	print('\tFlask App created successfully...')
 	return app
