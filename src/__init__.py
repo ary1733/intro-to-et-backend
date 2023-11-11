@@ -24,7 +24,7 @@ def init_app():
 	app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # set it to False to disable tracking and use less memory
 	app.config['JWT_SECRET_KEY'] = environ["JWT_SECRET"] # secret key for JWT
 	# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(seconds=10)
-	app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+	app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30)
 	app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 	app.config["JWT_ERROR_MESSAGE_KEY"] = 'message'
 	app.config['TRAP_HTTP_EXCEPTIONS']=True
@@ -44,7 +44,7 @@ def init_app():
 	# will initialise the db models like
 	# user,post etc.
 	from src.user import user_blueprint
-	from src.post import post_blueprint
+	from src.score import post_blueprint
 	for blueprint in [user_blueprint,post_blueprint]:
 		print('\troutes for '+str(blueprint)+' loaded...')
 		app.register_blueprint(blueprint)

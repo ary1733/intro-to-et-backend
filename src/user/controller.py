@@ -18,12 +18,12 @@ def ping():
 def signup():
     email = request.json.get("email")
     password = request.json.get("password")
-    role = request.json.get("role")
+    # role = request.json.get("role")
     name = request.json.get("name")
     if (not email or not password or not name):
         raise Exception('please provide email, password and name')
-    if(role!='USER' and role!='ADMIN'):
-        raise Exception('role can either be USER or ADMIN')
+    # if(role!='USER' and role!='ADMIN'):
+    #     raise Exception('role can either be USER or ADMIN')
     
     try:
         user = User.query.filter_by(email=email).one_or_none()
@@ -33,7 +33,7 @@ def signup():
     if (user):
         raise Exception('user with email=[{}] already present'.format(email))
     password = generate_password_hash(password)
-    new_user = User(email=email, password=password,role=role,name=name)
+    new_user = User(email=email, password=password,name=name)
     try:
         db.session.add(new_user)
         db.session.commit()

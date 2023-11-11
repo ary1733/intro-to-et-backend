@@ -12,3 +12,4 @@ credentials.json
 /logs
 /file_data
 *.DS_Store
+# instance store it 
