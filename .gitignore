@@ -13,3 +13,5 @@ credentials.json
 /file_data
 *.DS_Store
 # instance store it 
+/instance
+instance/site.db

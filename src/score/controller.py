@@ -33,7 +33,7 @@ def submitScore():
 	except Exception as e:
 		raise e
 
-	return jsonify({'message': 'Post created successfully'})
+	return jsonify({'message': 'Score submitted successfully'})
 
 @post_blueprint.get('/allscores')
 @jwt_required()
